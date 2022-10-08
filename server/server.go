@@ -17,6 +17,7 @@ import (
 type Server struct {
 	pb.ChatServiceServer
 	messageChannels map[int32]chan *pb.ChatMessage //Lav om til slice.
+	streams         []*pb.ChatService_PublishMessageServer
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
@@ -55,6 +56,10 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
 func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatService_PublishMessageServer) error {
+	if s.streams[clientMessage.ChatMessage.Userid] == nil {
+		fmt.Println("gik ind i første loop, godt.")
+		s.streams = append(s.streams, &stream)
+	}
 	fmt.Println("Server trying to publish message from user: ", clientMessage.ChatMessage.Userid)
 	response := &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
@@ -87,6 +92,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterChatServiceServer(grpcServer, &Server{
 		messageChannels: make(map[int32]chan *pb.ChatMessage),
+		streams:         make([]*pb.ChatService_PublishMessageServer, 10),
 	})
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)
