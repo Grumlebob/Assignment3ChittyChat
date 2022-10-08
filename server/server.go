@@ -20,7 +20,7 @@ type Server struct {
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
-	fmt.Println("Server pinged:", time.Now())
+	fmt.Println("Server pinged:", time.Now(), "by client:", clientMessage.ChatMessage.Userid)
 	//If user exists:
 	if s.messageChannels[clientMessage.ChatMessage.Userid] != nil {
 		fmt.Println("User exists with ID: ", clientMessage.ChatMessage.Userid)
@@ -48,6 +48,22 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 			Message:     "Client ID: " + string(idgenerator),
 			Userid:      int32(idgenerator),
 			LamportTime: 0,
+		},
+	}, nil
+}
+
+func (s *Server) SendMessage(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
+
+	//broadcast to all channels
+	for _, channel := range s.messageChannels {
+		channel <- clientMessage.ChatMessage
+	}
+
+	return &protos.ServerResponse{
+		ChatMessage: &protos.ChatMessage{
+			Message:     "Message sent",
+			Userid:      clientMessage.ChatMessage.Userid,
+			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}, nil
 }

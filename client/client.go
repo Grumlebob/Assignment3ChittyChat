@@ -12,7 +12,7 @@ import (
 	"github.com/Grumlebob/Assignment3ChittyChat/protos"
 )
 
-var clientId int32
+var userId int32
 
 func main() {
 	// Create a virtual RPC Client Connection on port 9080
@@ -30,14 +30,16 @@ func main() {
 	client := protos.NewChatServiceClient(conn)
 
 	getClientId(client, context)
-	//sendMessage(client, context)
+	sendMessage(client, context, "hello 1")
+	sendMessage(client, context, "hello 2")
+	sendMessage(client, context, "hello 3")
 }
 
 func getClientId(client protos.ChatServiceClient, context context.Context) {
 	clientRequest := protos.ClientRequest{
 		ChatMessage: &protos.ChatMessage{
 			Message:     "New User",
-			Userid:      clientId,
+			Userid:      userId,
 			LamportTime: 0,
 		},
 	}
@@ -46,18 +48,17 @@ func getClientId(client protos.ChatServiceClient, context context.Context) {
 		log.Fatalf("Error when calling server: %s", err)
 	}
 
-	clientId = user.ChatMessage.Userid
-	fmt.Println("Hello! - You are ID: ", clientId)
+	userId = user.ChatMessage.Userid
+	fmt.Println("Hello! - You are ID: ", userId)
 }
 
-func sendMessage(client protos.ChatServiceClient, context context.Context) {
-
-	fmt.Println("Client sends message: ")
+func sendMessage(client protos.ChatServiceClient, context context.Context, message string) {
+	fmt.Println("Client ", userId, " attempts to send message: ", message)
 
 	clientRequest := protos.ClientRequest{
 		ChatMessage: &protos.ChatMessage{
-			Message:     "Hello World",
-			Userid:      5,
+			Message:     message,
+			Userid:      userId,
 			LamportTime: 0,
 		},
 	}
@@ -66,9 +67,6 @@ func sendMessage(client protos.ChatServiceClient, context context.Context) {
 	if err != nil {
 		log.Fatalf("Error when calling server: %s", err)
 	}
-
-	steamOfResponses.SendMsg(clientRequest)
-
 	for {
 		response, err := steamOfResponses.Recv()
 		if err != nil {
