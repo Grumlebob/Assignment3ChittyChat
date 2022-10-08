@@ -26,8 +26,8 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	for {
 		fmt.Println("loop:", s.messageChannels[int32(idgenerator)])
 		if s.messageChannels[int32(idgenerator)] == nil {
+			fmt.Println("Gik ind i if. Channel er nil")
 			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
-			s.messageChannels[int32(idgenerator)] <- clientMessage.ChatMessage
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
