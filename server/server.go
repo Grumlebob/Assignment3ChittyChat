@@ -68,13 +68,8 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}
-	/*
-		if err := stream.Send(response); err != nil {
-			log.Printf("send error %v", err)
-		}
-	*/
-	//broadcast to all channels
 
+	//broadcast to all channels
 	fmt.Println("enter broadcasting")
 	totalUsers := len(s.messageChannels)
 	fmt.Println("Total users: ", len(s.messageChannels))

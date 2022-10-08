@@ -33,6 +33,7 @@ func main() {
 	client := pb.NewChatServiceClient(conn)
 
 	getClientId(client, context)
+	//Indsæt join chat methods
 
 	sendMessage(client, context, "hello 1")
 	//sendMessage(client, context, "hello 2")
@@ -77,13 +78,13 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 		log.Fatalf("Opening stream: %s", err)
 	}
 	for {
-		feature, err := stream.Recv()
+		message, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
+			log.Fatalf("%v.PublishMessage(_) = _, %v", client, err)
 		}
-		log.Println(feature)
+		log.Println(message)
 	}
 }
