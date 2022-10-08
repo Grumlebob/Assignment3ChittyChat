@@ -54,19 +54,21 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
 func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatService_PublishMessageServer) error {
-	fmt.Println("kom her til 1: ")
+	fmt.Println("Server trying to publish message from user: ", clientMessage.ChatMessage.Userid)
 	response := &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
-			Message:     "Message sent",
+			Message:     "Message sent: " + clientMessage.ChatMessage.Message,
 			Userid:      clientMessage.ChatMessage.Userid,
 			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}
-	fmt.Println("kom her til 2: ")
 	if err := stream.Send(response); err != nil {
 		log.Printf("send error %v", err)
 	}
-	fmt.Println("kom her til 3: ")
+	//broadcast to all channels
+	for _, channel := range s.messageChannels {
+		channel <- clientMessage.ChatMessage
+	}
 	return nil
 }
 

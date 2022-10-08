@@ -40,7 +40,7 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		sendMessage(client, context, scanner.Text())
 	}
 }
 
