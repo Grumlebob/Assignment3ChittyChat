@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package protos;
+option go_package = "https://github.com/Grumlebob/grpcPhysicalTime/tree/master/protos";
+
+import "google/protobuf/timestamp.proto";  
+
+//Important commands:
+//When updating proto file:
+//protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative protos/time.proto
+//When changing server file:
+//docker build -t test --no-cache .
+//docker run -p 9080:9080 -tid test
+//When changing client:
+//go run .
+
+
+
+service ChatService {
+    rpc GetTime (ClientRequest) returns (ServerResponse) {}
+}
+
+message ClientRequest {
+    google.protobuf.Timestamp timestamp = 1;
+}
+
+message ServerResponse {
+    google.protobuf.Timestamp timestampRecieved = 1;
+    google.protobuf.Timestamp timestampSent = 2;
+}
