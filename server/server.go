@@ -68,22 +68,22 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}
-	if err := stream.Send(response); err != nil {
-		log.Printf("send error %v", err)
-	}
+	/*
+		if err := stream.Send(response); err != nil {
+			log.Printf("send error %v", err)
+		}
+	*/
 	//broadcast to all channels
 
 	fmt.Println("enter broadcasting:")
 	totalUsers := len(s.messageChannels)
-
 	fmt.Println("Total users: ", len(s.messageChannels))
-
 	for i, stream := range s.messageChannels {
+		totalUsers--
 		fmt.Println("Broadcasting to user: ", i)
 		if err := (*stream).Send(response); err != nil {
 			log.Printf("send error %v", err)
 		}
-		totalUsers--
 		fmt.Println("Reamining users to broadcast to: ", totalUsers)
 		if totalUsers == 0 {
 			break
