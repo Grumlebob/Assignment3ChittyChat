@@ -17,7 +17,6 @@ import (
 type Server struct {
 	pb.ChatServiceServer
 	messageChannels map[int32]*pb.ChatService_PublishMessageServer
-	streams         []*pb.ChatService_PublishMessageServer //Fjern slice
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
@@ -43,7 +42,6 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 		idgenerator = rand.Intn(math.MaxInt32)
 	}
 	fmt.Println("generated new user with ID:", idgenerator)
-	fmt.Println("Total users: ", len(s.messageChannels))
 
 	return &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
@@ -60,7 +58,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		s.messageChannels[clientMessage.ChatMessage.Userid] = &stream
-		fmt.Println("Tilføjet stream på user.", clientMessage.ChatMessage.Userid)
+		fmt.Println("Added user stream to map.", clientMessage.ChatMessage.Userid)
 	}
 
 	response := &pb.ServerResponse{
@@ -74,14 +72,22 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 		log.Printf("send error %v", err)
 	}
 	//broadcast to all channels
+
 	fmt.Println("enter broadcasting:")
+	totalUsers := len(s.messageChannels)
+
+	fmt.Println("Total users: ", len(s.messageChannels))
 
 	for i, stream := range s.messageChannels {
 		fmt.Println("Broadcasting to user: ", i)
 		if err := (*stream).Send(response); err != nil {
 			log.Printf("send error %v", err)
 		}
-		fmt.Println("loop broadcasting index: ", i)
+		totalUsers--
+		fmt.Println("Reamining users to broadcast to: ", totalUsers)
+		if totalUsers == 0 {
+			break
+		}
 	}
 
 	return nil
@@ -96,7 +102,6 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterChatServiceServer(grpcServer, &Server{
 		messageChannels: make(map[int32]*pb.ChatService_PublishMessageServer),
-		streams:         make([]*pb.ChatService_PublishMessageServer, 10),
 	})
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)
