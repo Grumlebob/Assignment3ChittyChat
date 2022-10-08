@@ -22,6 +22,8 @@ type Server struct {
 func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
 	fmt.Println("Server pinged:", time.Now())
 	idgenerator := rand.Intn(math.MaxInt32)
+	fmt.Println("Random number:", idgenerator)
+	s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
 			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
