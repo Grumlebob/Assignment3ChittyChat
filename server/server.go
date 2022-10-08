@@ -16,7 +16,7 @@ import (
 
 type Server struct {
 	pb.ChatServiceServer
-	messageChannels map[int32]chan *pb.ChatMessage
+	messageChannels map[int32]chan *pb.ChatMessage //Lav om til slice.
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
