@@ -9,23 +9,23 @@ import (
 	"net"
 	"time"
 
-	"github.com/Grumlebob/Assignment3ChittyChat/protos"
+	pb "github.com/Grumlebob/Assignment3ChittyChat/protos"
 
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	protos.ChatServiceServer
-	messageChannels map[int32]chan *protos.ChatMessage
+	pb.ChatServiceServer
+	messageChannels map[int32]chan *pb.ChatMessage
 }
 
-func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
+func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
 	fmt.Println("Server pinged:", time.Now(), "by client:", clientMessage.ChatMessage.Userid)
 	//If user exists:
 	if s.messageChannels[clientMessage.ChatMessage.Userid] != nil {
 		fmt.Println("User exists with ID: ", clientMessage.ChatMessage.Userid)
-		return &protos.ServerResponse{
-			ChatMessage: &protos.ChatMessage{
+		return &pb.ServerResponse{
+			ChatMessage: &pb.ChatMessage{
 				Message:     clientMessage.ChatMessage.Message,
 				Userid:      clientMessage.ChatMessage.Userid,
 				LamportTime: clientMessage.ChatMessage.LamportTime,
@@ -36,15 +36,15 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
-			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
+			s.messageChannels[int32(idgenerator)] = make(chan *pb.ChatMessage)
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
 	}
 	fmt.Println("generated new user with ID:", idgenerator)
 
-	return &protos.ServerResponse{
-		ChatMessage: &protos.ChatMessage{
+	return &pb.ServerResponse{
+		ChatMessage: &pb.ChatMessage{
 			Message:     "Client ID: " + string(idgenerator),
 			Userid:      int32(idgenerator),
 			LamportTime: 0,
@@ -52,10 +52,10 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	}, nil
 }
 
-func (s *Server) SendMessage(clientMessage *protos.ClientRequest, stream protos.ChatService_PublishMessageServer) error {
+func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatService_PublishMessageServer) error {
 	fmt.Println("kom her til 1: ")
-	response := &protos.ServerResponse{
-		ChatMessage: &protos.ChatMessage{
+	response := &pb.ServerResponse{
+		ChatMessage: &pb.ChatMessage{
 			Message:     "Message sent",
 			Userid:      clientMessage.ChatMessage.Userid,
 			LamportTime: clientMessage.ChatMessage.LamportTime,
@@ -76,8 +76,8 @@ func main() {
 		log.Fatalf("Failed to listen on port 9080: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	protos.RegisterChatServiceServer(grpcServer, &Server{
-		messageChannels: make(map[int32]chan *protos.ChatMessage),
+	pb.RegisterChatServiceServer(grpcServer, &Server{
+		messageChannels: make(map[int32]chan *pb.ChatMessage),
 	})
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)

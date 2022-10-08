@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/Grumlebob/Assignment3ChittyChat/protos"
+	pb "github.com/Grumlebob/Assignment3ChittyChat/protos"
 )
 
 var userId int32
@@ -30,11 +30,11 @@ func main() {
 	defer conn.Close()
 
 	//  Create new Client from generated gRPC code from proto
-	client := protos.NewChatServiceClient(conn)
+	client := pb.NewChatServiceClient(conn)
 
 	getClientId(client, context)
 
-	sendMessage(client, context, "hello 1")
+	//sendMessage(client, context, "hello 1")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -42,9 +42,9 @@ func main() {
 	}
 }
 
-func getClientId(client protos.ChatServiceClient, context context.Context) {
-	clientRequest := protos.ClientRequest{
-		ChatMessage: &protos.ChatMessage{
+func getClientId(client pb.ChatServiceClient, context context.Context) {
+	clientRequest := pb.ClientRequest{
+		ChatMessage: &pb.ChatMessage{
 			Message:     "New User",
 			Userid:      userId,
 			LamportTime: 0,
@@ -59,11 +59,11 @@ func getClientId(client protos.ChatServiceClient, context context.Context) {
 	fmt.Println("Hello! - You are ID: ", userId)
 }
 
-func sendMessage(client protos.ChatServiceClient, context context.Context, message string) {
+func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
 	fmt.Println("Client ", userId, " attempts to send message: ", message)
 
-	clientRequest := &protos.ClientRequest{
-		ChatMessage: &protos.ChatMessage{
+	clientRequest := &pb.ClientRequest{
+		ChatMessage: &pb.ChatMessage{
 			Message:     message,
 			Userid:      userId,
 			LamportTime: 0,
