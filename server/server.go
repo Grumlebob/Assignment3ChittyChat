@@ -16,7 +16,8 @@ import (
 
 type Server struct {
 	pb.ChatServiceServer
-	messageChannels map[int32]*pb.ChatService_PublishMessageServer
+	messageChannels  map[int32]*pb.ChatService_PublishMessageServer
+	messageChannels2 map[int32]chan *pb.ChatMessage //NÅEDE HER TIL. Check Nad: JoinRoom
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
@@ -89,6 +90,29 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	return nil
 }
 
+// rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
+func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService_JoinChatServer) error {
+	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid)
+
+	messageChannel := make(chan *pb.ChatMessage)
+
+	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
+		//s.messageChannels[clientMessage.ChatMessage.Userid] = &stream
+		fmt.Println("Added user stream to map.", clientMessage.ChatMessage.Userid)
+	}
+
+	for {
+		select {
+		case <-stream.Context().Done():
+			return nil
+		case message := <-messageChannel:
+			//stream.Send(message)
+		}
+	}
+
+	return nil
+}
+
 func main() {
 	// Create listener tcp on port 9080
 	listener, err := net.Listen("tcp", ":9080")
@@ -102,5 +126,4 @@ func main() {
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)
 	}
-
 }
