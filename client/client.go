@@ -34,7 +34,9 @@ func main() {
 
 	getClientId(client, context)
 
-	//sendMessage(client, context, "hello 1")
+	sendMessage(client, context, "hello 1")
+	sendMessage(client, context, "hello 2")
+	sendMessage(client, context, "hello 3")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
