@@ -75,13 +75,14 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	*/
 	//broadcast to all channels
 
-	fmt.Println("enter broadcasting:")
+	fmt.Println("enter broadcasting")
 	totalUsers := len(s.messageChannels)
 	fmt.Println("Total users: ", len(s.messageChannels))
-	for i, stream := range s.messageChannels {
+	for i, streams := range s.messageChannels {
 		totalUsers--
 		fmt.Println("Broadcasting to user: ", i)
-		if err := (*stream).Send(response); err != nil {
+		streamPointer := *streams
+		if err := streamPointer.Send(response); err != nil {
 			log.Printf("send error %v", err)
 		}
 		fmt.Println("Reamining users to broadcast to: ", totalUsers)
@@ -89,7 +90,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 			break
 		}
 	}
-
+	fmt.Println("Left broadcasting")
 	return nil
 }
 
