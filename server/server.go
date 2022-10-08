@@ -67,11 +67,13 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	}
 	//broadcast to all channels
 	fmt.Println("enter broadcasting:")
-	for i, channel := range s.messageChannels {
-		fmt.Println("broadcasting to channel: ", i)
-		channel <- response.ChatMessage
-		fmt.Println("i loop broadcasting:")
-	}
+	/*
+		for i, channel := range s.messageChannels {
+			fmt.Println("broadcasting to channel: ", i)
+			channel <- response.ChatMessage
+			fmt.Println("i loop broadcasting:")
+		}
+	*/
 	return nil
 }
 
