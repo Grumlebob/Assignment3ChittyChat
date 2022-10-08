@@ -16,8 +16,8 @@ import (
 
 type Server struct {
 	pb.ChatServiceServer
-	messageChannels map[int32]chan *pb.ChatMessage //Lav om til slice.
-	streams         []*pb.ChatService_PublishMessageServer
+	messageChannels map[int32]*pb.ChatService_PublishMessageServer
+	streams         []*pb.ChatService_PublishMessageServer //Fjern slice
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
@@ -37,7 +37,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
-			s.messageChannels[int32(idgenerator)] = make(chan *pb.ChatMessage, 1)
+			//s.messageChannels[int32(idgenerator)] = &pb.ChatService_PublishMessageServer{}
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
@@ -56,11 +56,13 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
 func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatService_PublishMessageServer) error {
-	if s.streams[clientMessage.ChatMessage.Userid] == nil {
-		fmt.Println("gik ind i første loop, godt.")
-		s.streams = append(s.streams, &stream)
-	}
 	fmt.Println("Server trying to publish message from user: ", clientMessage.ChatMessage.Userid)
+
+	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
+		s.messageChannels[clientMessage.ChatMessage.Userid] = &stream
+		fmt.Println("Tilføjet stream på user.", clientMessage.ChatMessage.Userid)
+	}
+
 	response := &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
 			Message:     "Message sent: " + clientMessage.ChatMessage.Message,
@@ -73,13 +75,15 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	}
 	//broadcast to all channels
 	fmt.Println("enter broadcasting:")
-	/*
-		for i, channel := range s.messageChannels {
-			fmt.Println("broadcasting to channel: ", i)
-			channel <- response.ChatMessage
-			fmt.Println("i loop broadcasting:")
+
+	for i, stream := range s.messageChannels {
+		fmt.Println("Broadcasting to user: ", i)
+		if err := (*stream).Send(response); err != nil {
+			log.Printf("send error %v", err)
 		}
-	*/
+		fmt.Println("loop broadcasting index: ", i)
+	}
+
 	return nil
 }
 
@@ -91,7 +95,7 @@ func main() {
 	}
 	grpcServer := grpc.NewServer()
 	pb.RegisterChatServiceServer(grpcServer, &Server{
-		messageChannels: make(map[int32]chan *pb.ChatMessage),
+		messageChannels: make(map[int32]*pb.ChatService_PublishMessageServer),
 		streams:         make([]*pb.ChatService_PublishMessageServer, 10),
 	})
 	if err := grpcServer.Serve(listener); err != nil {
