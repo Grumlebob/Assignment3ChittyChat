@@ -36,7 +36,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
-			s.messageChannels[int32(idgenerator)] = make(chan *pb.ChatMessage)
+			s.messageChannels[int32(idgenerator)] = make(chan *pb.ChatMessage, 1)
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
