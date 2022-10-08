@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -30,9 +32,15 @@ func main() {
 	client := protos.NewChatServiceClient(conn)
 
 	getClientId(client, context)
+
 	sendMessage(client, context, "hello 1")
 	sendMessage(client, context, "hello 2")
 	sendMessage(client, context, "hello 3")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		go sendMessage(client, context, scanner.Text())
+	}
 }
 
 func getClientId(client protos.ChatServiceClient, context context.Context) {
@@ -67,12 +75,15 @@ func sendMessage(client protos.ChatServiceClient, context context.Context, messa
 	if err != nil {
 		log.Fatalf("Error when calling server: %s", err)
 	}
-	for {
-		response, err := steamOfResponses.Recv()
-		if err != nil {
-			log.Fatalf("Error when receiving response from server: %s", err)
+	fmt.Println("Response from server: ", steamOfResponses)
+	/*
+		for {
+			response, err := steamOfResponses.Recv()
+			if err != nil {
+				log.Fatalf("Error when receiving response from server: %s", err)
+			}
+			fmt.Println("Response from server: ", response)
 		}
-		fmt.Println("Response from server: ", response)
-	}
 
+	*/
 }

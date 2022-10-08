@@ -52,20 +52,21 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	}, nil
 }
 
-func (s *Server) SendMessage(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
-
+func (s *Server) SendMessage(ctx context.Context, clientMessage *protos.ClientRequest, messageStream protos.ChatService_PublishMessageServer) error {
 	//broadcast to all channels
 	for _, channel := range s.messageChannels {
 		channel <- clientMessage.ChatMessage
 	}
 
-	return &protos.ServerResponse{
+	messageStream.Send(&protos.ServerResponse{
 		ChatMessage: &protos.ChatMessage{
 			Message:     "Message sent",
 			Userid:      clientMessage.ChatMessage.Userid,
 			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
-	}, nil
+	})
+
+	return nil
 }
 
 func main() {
