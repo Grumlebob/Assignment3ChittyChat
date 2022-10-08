@@ -52,14 +52,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	}, nil
 }
 
-func (s *Server) SendMessage(ctx context.Context, clientMessage *protos.ClientRequest, messageStream protos.ChatService_PublishMessageServer, in *protos.ChatMessage) error {
-	//broadcast to all channels
-	/*
-		for _, channel := range s.messageChannels {
-			channel <- clientMessage.ChatMessage
-
-		}
-	*/
+func (s *Server) SendMessage(clientMessage *protos.ClientRequest, stream protos.ChatService_PublishMessageServer) error {
 	fmt.Println("kom her til 1: ")
 	response := &protos.ServerResponse{
 		ChatMessage: &protos.ChatMessage{
@@ -69,7 +62,7 @@ func (s *Server) SendMessage(ctx context.Context, clientMessage *protos.ClientRe
 		},
 	}
 	fmt.Println("kom her til 2: ")
-	if err := messageStream.Send(response); err != nil {
+	if err := stream.Send(response); err != nil {
 		log.Printf("send error %v", err)
 	}
 	//msg := messageStream.RecvMsg(clientMessage)
