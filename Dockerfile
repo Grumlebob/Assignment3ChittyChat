@@ -8,9 +8,9 @@ RUN export GO111MODULE=on
 COPY go.mod /build
 COPY go.sum /build/
 
-RUN cd /build/ && git clone https://github.com/Grumlebob/grpcPhysicalTime.git
-RUN cd /build/grpcPhysicalTime/server && go build ./...
+RUN cd /build/ && git clone https://github.com/Grumlebob/Assignment3ChittyChat.git
+RUN cd /build/Assignment3ChittyChat/server && go build ./...
 
 EXPOSE 9080
 
-ENTRYPOINT [ "/build/grpcPhysicalTime/server/server" ]
+ENTRYPOINT [ "/build/Assignment3ChittyChat/server/server" ]

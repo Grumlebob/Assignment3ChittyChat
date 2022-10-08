@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/Grumlebob/grpcPhysicalTime/protos"
+	"github.com/Grumlebob/Assignment3ChittyChat/protos"
 )
 
 func main() {

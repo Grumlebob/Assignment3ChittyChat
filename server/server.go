@@ -7,7 +7,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/Grumlebob/grpcPhysicalTime/protos"
+	"github.com/Grumlebob/Assignment3ChittyChat/protos"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"

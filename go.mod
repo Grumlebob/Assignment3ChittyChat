@@ -1,4 +1,4 @@
-module github.com/Grumlebob/grpcPhysicalTime
+module github.com/Grumlebob/Assignment3ChittyChat
 
 go 1.19
 

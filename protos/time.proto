@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package protos;
-option go_package = "https://github.com/Grumlebob/grpcPhysicalTime/tree/master/protos";
+option go_package = "https://github.com/Grumlebob/Assignment3ChittyChat/tree/master/protos";
 
 import "google/protobuf/timestamp.proto";  
 
