@@ -23,7 +23,6 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	fmt.Println("Server pinged:", time.Now())
 	idgenerator := rand.Intn(math.MaxInt32)
 	fmt.Println("Random number:", idgenerator)
-	s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage, 1)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
 			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
