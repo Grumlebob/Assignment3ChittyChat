@@ -22,7 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatServiceClient interface {
-	GetTime(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error)
+	JoinChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_JoinChatClient, error)
+	LeaveChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_LeaveChatClient, error)
+	PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_PublishMessageClient, error)
 }
 
 type chatServiceClient struct {
@@ -33,20 +35,109 @@ func NewChatServiceClient(cc grpc.ClientConnInterface) ChatServiceClient {
 	return &chatServiceClient{cc}
 }
 
-func (c *chatServiceClient) GetTime(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error) {
-	out := new(ServerResponse)
-	err := c.cc.Invoke(ctx, "/protos.ChatService/GetTime", in, out, opts...)
+func (c *chatServiceClient) JoinChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_JoinChatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChatService_ServiceDesc.Streams[0], "/protos.ChatService/JoinChat", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &chatServiceJoinChatClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ChatService_JoinChatClient interface {
+	Recv() (*ServerResponse, error)
+	grpc.ClientStream
+}
+
+type chatServiceJoinChatClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatServiceJoinChatClient) Recv() (*ServerResponse, error) {
+	m := new(ServerResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *chatServiceClient) LeaveChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_LeaveChatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChatService_ServiceDesc.Streams[1], "/protos.ChatService/LeaveChat", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &chatServiceLeaveChatClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ChatService_LeaveChatClient interface {
+	Recv() (*ServerResponse, error)
+	grpc.ClientStream
+}
+
+type chatServiceLeaveChatClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatServiceLeaveChatClient) Recv() (*ServerResponse, error) {
+	m := new(ServerResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *chatServiceClient) PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_PublishMessageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChatService_ServiceDesc.Streams[2], "/protos.ChatService/PublishMessage", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &chatServicePublishMessageClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ChatService_PublishMessageClient interface {
+	Recv() (*ServerResponse, error)
+	grpc.ClientStream
+}
+
+type chatServicePublishMessageClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatServicePublishMessageClient) Recv() (*ServerResponse, error) {
+	m := new(ServerResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // ChatServiceServer is the server API for ChatService service.
 // All implementations must embed UnimplementedChatServiceServer
 // for forward compatibility
 type ChatServiceServer interface {
-	GetTime(context.Context, *ClientRequest) (*ServerResponse, error)
+	JoinChat(*ClientRequest, ChatService_JoinChatServer) error
+	LeaveChat(*ClientRequest, ChatService_LeaveChatServer) error
+	PublishMessage(*ClientRequest, ChatService_PublishMessageServer) error
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -54,8 +145,14 @@ type ChatServiceServer interface {
 type UnimplementedChatServiceServer struct {
 }
 
-func (UnimplementedChatServiceServer) GetTime(context.Context, *ClientRequest) (*ServerResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTime not implemented")
+func (UnimplementedChatServiceServer) JoinChat(*ClientRequest, ChatService_JoinChatServer) error {
+	return status.Errorf(codes.Unimplemented, "method JoinChat not implemented")
+}
+func (UnimplementedChatServiceServer) LeaveChat(*ClientRequest, ChatService_LeaveChatServer) error {
+	return status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
+}
+func (UnimplementedChatServiceServer) PublishMessage(*ClientRequest, ChatService_PublishMessageServer) error {
+	return status.Errorf(codes.Unimplemented, "method PublishMessage not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
 
@@ -70,22 +167,67 @@ func RegisterChatServiceServer(s grpc.ServiceRegistrar, srv ChatServiceServer) {
 	s.RegisterService(&ChatService_ServiceDesc, srv)
 }
 
-func _ChatService_GetTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClientRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _ChatService_JoinChat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ClientRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(ChatServiceServer).GetTime(ctx, in)
+	return srv.(ChatServiceServer).JoinChat(m, &chatServiceJoinChatServer{stream})
+}
+
+type ChatService_JoinChatServer interface {
+	Send(*ServerResponse) error
+	grpc.ServerStream
+}
+
+type chatServiceJoinChatServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatServiceJoinChatServer) Send(m *ServerResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _ChatService_LeaveChat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ClientRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.ChatService/GetTime",
+	return srv.(ChatServiceServer).LeaveChat(m, &chatServiceLeaveChatServer{stream})
+}
+
+type ChatService_LeaveChatServer interface {
+	Send(*ServerResponse) error
+	grpc.ServerStream
+}
+
+type chatServiceLeaveChatServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatServiceLeaveChatServer) Send(m *ServerResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _ChatService_PublishMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ClientRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).GetTime(ctx, req.(*ClientRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(ChatServiceServer).PublishMessage(m, &chatServicePublishMessageServer{stream})
+}
+
+type ChatService_PublishMessageServer interface {
+	Send(*ServerResponse) error
+	grpc.ServerStream
+}
+
+type chatServicePublishMessageServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatServicePublishMessageServer) Send(m *ServerResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // ChatService_ServiceDesc is the grpc.ServiceDesc for ChatService service.
@@ -94,12 +236,23 @@ func _ChatService_GetTime_Handler(srv interface{}, ctx context.Context, dec func
 var ChatService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "protos.ChatService",
 	HandlerType: (*ChatServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "GetTime",
-			Handler:    _ChatService_GetTime_Handler,
+			StreamName:    "JoinChat",
+			Handler:       _ChatService_JoinChat_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "LeaveChat",
+			Handler:       _ChatService_LeaveChat_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "PublishMessage",
+			Handler:       _ChatService_PublishMessage_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "protos/time.proto",
 }

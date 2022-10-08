@@ -3,7 +3,6 @@ syntax = "proto3";
 package protos;
 option go_package = "https://github.com/Grumlebob/Assignment3ChittyChat/tree/master/protos";
 
-import "google/protobuf/timestamp.proto";  
 
 //Important commands:
 //When updating proto file:
@@ -15,16 +14,27 @@ import "google/protobuf/timestamp.proto";
 //go run .
 
 
+//A server-side streaming RPC where the client sends a request to the server and gets a stream to read a sequence of messages back. The client reads from the returned stream until there are no more messages
 
+//A client-side streaming RPC where the client writes a sequence of messages and sends them to the server, again using a provided stream. Once the client has finished writing the messages, it waits for the server to read them all and return its response
+
+//A bidirectional streaming RPC where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved
 service ChatService {
-    rpc GetTime (ClientRequest) returns (ServerResponse) {}
+    rpc JoinChat(ClientRequest) returns (stream ServerResponse) {}
+    rpc LeaveChat(ClientRequest) returns (stream ServerResponse) {}
+    rpc PublishMessage(ClientRequest) returns (stream ServerResponse) {}
+}
+
+message ChatMessage {
+    string message = 1;
+    int32 userid = 2;
+    int64 lamportTime = 3;
 }
 
 message ClientRequest {
-    google.protobuf.Timestamp timestamp = 1;
+    ChatMessage chatMessage = 1;
 }
 
 message ServerResponse {
-    google.protobuf.Timestamp timestampRecieved = 1;
-    google.protobuf.Timestamp timestampSent = 2;
+    ChatMessage chatMessage = 1;
 }
