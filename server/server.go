@@ -21,18 +21,27 @@ type Server struct {
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
 	fmt.Println("Server pinged:", time.Now())
+	//If user exists:
+	if s.messageChannels[clientMessage.ChatMessage.Userid] != nil {
+		fmt.Println("User exists with ID: ", clientMessage.ChatMessage.Userid)
+		return &protos.ServerResponse{
+			ChatMessage: &protos.ChatMessage{
+				Message:     clientMessage.ChatMessage.Message,
+				Userid:      clientMessage.ChatMessage.Userid,
+				LamportTime: clientMessage.ChatMessage.LamportTime,
+			},
+		}, nil
+	}
+	//If user doesn't exist:
 	idgenerator := rand.Intn(math.MaxInt32)
-	fmt.Println("Random number:", idgenerator)
 	for {
-		fmt.Println("loop:", s.messageChannels[int32(idgenerator)])
 		if s.messageChannels[int32(idgenerator)] == nil {
-			fmt.Println("Gik ind i if. Channel er nil")
 			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
 	}
-	fmt.Println("Out of id loop:", idgenerator)
+	fmt.Println("generated new user with ID:", idgenerator)
 
 	return &protos.ServerResponse{
 		ChatMessage: &protos.ChatMessage{

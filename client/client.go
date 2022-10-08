@@ -12,6 +12,8 @@ import (
 	"github.com/Grumlebob/Assignment3ChittyChat/protos"
 )
 
+var clientId int32
+
 func main() {
 	// Create a virtual RPC Client Connection on port 9080
 	var conn *grpc.ClientConn
@@ -32,23 +34,20 @@ func main() {
 }
 
 func getClientId(client protos.ChatServiceClient, context context.Context) {
-	fmt.Println("Client sends message: ")
-
 	clientRequest := protos.ClientRequest{
 		ChatMessage: &protos.ChatMessage{
 			Message:     "New User",
-			Userid:      0,
+			Userid:      clientId,
 			LamportTime: 0,
 		},
 	}
-
 	user, err := client.GetClientId(context, &clientRequest)
 	if err != nil {
 		log.Fatalf("Error when calling server: %s", err)
 	}
 
-	fmt.Println("Hello new Client - you have been assigned ID: ", user.ChatMessage.Userid)
-
+	clientId = user.ChatMessage.Userid
+	fmt.Println("Hello! - You are ID: ", clientId)
 }
 
 func sendMessage(client protos.ChatServiceClient, context context.Context) {
