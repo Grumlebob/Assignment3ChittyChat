@@ -23,13 +23,13 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 	fmt.Println("Server pinged:", time.Now())
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
-		err := s.messageChannels[int32(idgenerator)]
-		if err != nil {
+		if s.messageChannels[int32(idgenerator)] == nil {
 			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
 	}
+	fmt.Println("Out of id loop:", idgenerator)
 
 	//s.messageChannels[int32(idgenerator)] <- clientMessage.ChatMessage
 	return &protos.ServerResponse{

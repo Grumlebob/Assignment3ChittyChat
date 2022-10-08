@@ -15,10 +15,10 @@ import (
 func main() {
 	// Create a virtual RPC Client Connection on port 9080
 	var conn *grpc.ClientConn
-	context, cancelFunction := context.WithTimeout(context.Background(), time.Second*2) //standard er 5
+	context, cancelFunction := context.WithTimeout(context.Background(), time.Second*200) //standard er 5
 	defer cancelFunction()
 	// IPv4:port = "172.30.48.1:9080"
-	conn, err := grpc.DialContext(context, "172.30.48.1:9080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.DialContext(context, ":9080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Could not connect: %s", err)
 	}
