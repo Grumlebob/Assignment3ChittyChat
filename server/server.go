@@ -4,31 +4,41 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"net"
 	"time"
 
 	"github.com/Grumlebob/Assignment3ChittyChat/protos"
 
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Server struct {
 	protos.ChatServiceServer
+	messageChannels map[int32]chan *protos.ChatMessage
 }
 
-func (s *Server) GetTime(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
-	t2 := time.Now()
-	time2 := timestamppb.New(t2)
-
-	fmt.Println("T2:", time2)
-	fmt.Println("Server current time:", t2)
-
-	var response = &protos.ServerResponse{
-		TimestampRecieved: time2,
-		TimestampSent:     timestamppb.New(time.Now()),
+func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRequest) (*protos.ServerResponse, error) {
+	fmt.Println("Server pinged:", time.Now())
+	idgenerator := rand.Intn(math.MaxInt32)
+	for {
+		err := s.messageChannels[int32(idgenerator)]
+		if err != nil {
+			s.messageChannels[int32(idgenerator)] = make(chan *protos.ChatMessage)
+			break
+		}
+		idgenerator = rand.Intn(math.MaxInt32)
 	}
-	return response, nil
+
+	//s.messageChannels[int32(idgenerator)] <- clientMessage.ChatMessage
+	return &protos.ServerResponse{
+		ChatMessage: &protos.ChatMessage{
+			Message:     "Client ID: " + string(idgenerator),
+			Userid:      int32(idgenerator),
+			LamportTime: 0,
+		},
+	}, nil
 }
 
 func main() {

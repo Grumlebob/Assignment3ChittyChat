@@ -20,6 +20,7 @@ option go_package = "https://github.com/Grumlebob/Assignment3ChittyChat/tree/mas
 
 //A bidirectional streaming RPC where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved
 service ChatService {
+    rpc GetClientId(ClientRequest) returns (ServerResponse) {}
     rpc JoinChat(ClientRequest) returns (stream ServerResponse) {}
     rpc LeaveChat(ClientRequest) returns (stream ServerResponse) {}
     rpc PublishMessage(ClientRequest) returns (stream ServerResponse) {}

@@ -27,21 +27,55 @@ func main() {
 	//  Create new Client from generated gRPC code from proto
 	client := protos.NewChatServiceClient(conn)
 
-	sendMessage(client, context)
+	getClientId(client, context)
+	//sendMessage(client, context)
+}
+
+func getClientId(client protos.ChatServiceClient, context context.Context) {
+	fmt.Println("Client sends message: ")
+
+	clientRequest := protos.ClientRequest{
+		ChatMessage: &protos.ChatMessage{
+			Message:     "New User",
+			Userid:      0,
+			LamportTime: 0,
+		},
+	}
+
+	user, err := client.GetClientId(context, &clientRequest)
+	if err != nil {
+		log.Fatalf("Error when calling server: %s", err)
+	}
+
+	fmt.Println("Hello new Client - you have been assigned ID: ", user.ChatMessage.Userid)
+
 }
 
 func sendMessage(client protos.ChatServiceClient, context context.Context) {
 
-	fmt.Println("T1:")
+	fmt.Println("Client sends message: ")
 
 	clientRequest := protos.ClientRequest{
-		Timestamp: time1,
+		ChatMessage: &protos.ChatMessage{
+			Message:     "Hello World",
+			Userid:      5,
+			LamportTime: 0,
+		},
 	}
 
-	response, err := client.GetTime(context, &clientRequest)
+	steamOfResponses, err := client.PublishMessage(context, &clientRequest)
 	if err != nil {
 		log.Fatalf("Error when calling server: %s", err)
 	}
-	fmt.Println(response)
+
+	steamOfResponses.SendMsg(clientRequest)
+
+	for {
+		response, err := steamOfResponses.Recv()
+		if err != nil {
+			log.Fatalf("Error when receiving response from server: %s", err)
+		}
+		fmt.Println("Response from server: ", response)
+	}
 
 }

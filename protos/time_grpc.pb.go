@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatServiceClient interface {
+	GetClientId(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error)
 	JoinChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_JoinChatClient, error)
 	LeaveChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_LeaveChatClient, error)
 	PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_PublishMessageClient, error)
@@ -33,6 +34,15 @@ type chatServiceClient struct {
 
 func NewChatServiceClient(cc grpc.ClientConnInterface) ChatServiceClient {
 	return &chatServiceClient{cc}
+}
+
+func (c *chatServiceClient) GetClientId(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error) {
+	out := new(ServerResponse)
+	err := c.cc.Invoke(ctx, "/protos.ChatService/GetClientId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *chatServiceClient) JoinChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_JoinChatClient, error) {
@@ -135,6 +145,7 @@ func (x *chatServicePublishMessageClient) Recv() (*ServerResponse, error) {
 // All implementations must embed UnimplementedChatServiceServer
 // for forward compatibility
 type ChatServiceServer interface {
+	GetClientId(context.Context, *ClientRequest) (*ServerResponse, error)
 	JoinChat(*ClientRequest, ChatService_JoinChatServer) error
 	LeaveChat(*ClientRequest, ChatService_LeaveChatServer) error
 	PublishMessage(*ClientRequest, ChatService_PublishMessageServer) error
@@ -145,6 +156,9 @@ type ChatServiceServer interface {
 type UnimplementedChatServiceServer struct {
 }
 
+func (UnimplementedChatServiceServer) GetClientId(context.Context, *ClientRequest) (*ServerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClientId not implemented")
+}
 func (UnimplementedChatServiceServer) JoinChat(*ClientRequest, ChatService_JoinChatServer) error {
 	return status.Errorf(codes.Unimplemented, "method JoinChat not implemented")
 }
@@ -165,6 +179,24 @@ type UnsafeChatServiceServer interface {
 
 func RegisterChatServiceServer(s grpc.ServiceRegistrar, srv ChatServiceServer) {
 	s.RegisterService(&ChatService_ServiceDesc, srv)
+}
+
+func _ChatService_GetClientId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).GetClientId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.ChatService/GetClientId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).GetClientId(ctx, req.(*ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ChatService_JoinChat_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -236,7 +268,12 @@ func (x *chatServicePublishMessageServer) Send(m *ServerResponse) error {
 var ChatService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "protos.ChatService",
 	HandlerType: (*ChatServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetClientId",
+			Handler:    _ChatService_GetClientId_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "JoinChat",
