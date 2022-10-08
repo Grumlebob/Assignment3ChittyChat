@@ -75,15 +75,11 @@ func sendMessage(client protos.ChatServiceClient, context context.Context, messa
 	if err != nil {
 		log.Fatalf("Error when calling server: %s", err)
 	}
-	fmt.Println("Response from server: ", steamOfResponses)
-	/*
-		for {
-			response, err := steamOfResponses.Recv()
-			if err != nil {
-				log.Fatalf("Error when receiving response from server: %s", err)
-			}
-			fmt.Println("Response from server: ", response)
+	for {
+		response, err := steamOfResponses.Recv()
+		if err != nil {
+			log.Fatalf("Error when receiving response from server: %s", err)
 		}
-
-	*/
+		fmt.Println("Response from server: ", response)
+	}
 }

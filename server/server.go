@@ -54,9 +54,15 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *protos.ClientRe
 
 func (s *Server) SendMessage(ctx context.Context, clientMessage *protos.ClientRequest, messageStream protos.ChatService_PublishMessageServer) error {
 	//broadcast to all channels
-	for _, channel := range s.messageChannels {
-		channel <- clientMessage.ChatMessage
-	}
+	/*
+		for _, channel := range s.messageChannels {
+			channel <- clientMessage.ChatMessage
+
+		}
+	*/
+	msg := messageStream.RecvMsg(clientMessage)
+
+	fmt.Println("kom her til med msg: ", msg)
 
 	messageStream.Send(&protos.ServerResponse{
 		ChatMessage: &protos.ChatMessage{
