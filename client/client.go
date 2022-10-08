@@ -35,12 +35,10 @@ func main() {
 	getClientId(client, context)
 
 	sendMessage(client, context, "hello 1")
-	sendMessage(client, context, "hello 2")
-	sendMessage(client, context, "hello 3")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		go sendMessage(client, context, scanner.Text())
+		fmt.Println(scanner.Text())
 	}
 }
 
@@ -64,7 +62,7 @@ func getClientId(client protos.ChatServiceClient, context context.Context) {
 func sendMessage(client protos.ChatServiceClient, context context.Context, message string) {
 	fmt.Println("Client ", userId, " attempts to send message: ", message)
 
-	clientRequest := protos.ClientRequest{
+	clientRequest := &protos.ClientRequest{
 		ChatMessage: &protos.ChatMessage{
 			Message:     message,
 			Userid:      userId,
@@ -72,37 +70,18 @@ func sendMessage(client protos.ChatServiceClient, context context.Context, messa
 		},
 	}
 
-	steamOfResponses, err := client.PublishMessage(context, &clientRequest)
+	stream, err := client.PublishMessage(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Opening stream: %s", err)
 	}
-
-	done := make(chan bool)
-	go func() {
-		for {
-			resp, err := steamOfResponses.Recv()
-			if err == io.EOF {
-				done <- true //close(done)
-				return
-			}
-			if err != nil {
-				log.Fatalf("can not receive %v", err)
-			}
-			fmt.Println("Resp received:", resp.ChatMessage.Message)
+	for {
+		feature, err := stream.Recv()
+		if err == io.EOF {
+			break
 		}
-	}()
-	<-done
-	log.Printf("finished")
-
-	//steamOfResponses.SendMsg(&clientRequest)
-
-	/*
-		for {
-			response, err := steamOfResponses.Recv()
-			if err != nil {
-				log.Fatalf("Error when receiving response from server: %s", err)
-			}
-			fmt.Println("Response from server: ", response)
+		if err != nil {
+			log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
 		}
-	*/
+		log.Println(feature)
+	}
 }

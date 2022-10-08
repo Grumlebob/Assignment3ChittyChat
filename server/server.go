@@ -65,25 +65,20 @@ func (s *Server) SendMessage(clientMessage *protos.ClientRequest, stream protos.
 	if err := stream.Send(response); err != nil {
 		log.Printf("send error %v", err)
 	}
-	//msg := messageStream.RecvMsg(clientMessage)
 	fmt.Println("kom her til 3: ")
 	return nil
 }
 
 func main() {
 	// Create listener tcp on port 9080
-
 	listener, err := net.Listen("tcp", ":9080")
-
 	if err != nil {
 		log.Fatalf("Failed to listen on port 9080: %v", err)
 	}
-
 	grpcServer := grpc.NewServer()
 	protos.RegisterChatServiceServer(grpcServer, &Server{
 		messageChannels: make(map[int32]chan *protos.ChatMessage),
 	})
-
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)
 	}
