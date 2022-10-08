@@ -62,7 +62,7 @@ func (s *Server) SendMessage(clientMessage *protos.ClientRequest, stream protos.
 		},
 	}
 	fmt.Println("kom her til 2: ")
-	if err := stream.Send(response); err != nil {
+	if err := stream.RecvMsg(response); err != nil {
 		log.Printf("send error %v", err)
 	}
 	fmt.Println("kom her til 3: ")
