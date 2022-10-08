@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -73,10 +74,27 @@ func sendMessage(client protos.ChatServiceClient, context context.Context, messa
 
 	steamOfResponses, err := client.PublishMessage(context, &clientRequest)
 	if err != nil {
-		log.Fatalf("Error when calling server: %s", err)
+		log.Fatalf("Opening stream: %s", err)
 	}
 
-	steamOfResponses.SendMsg(&clientRequest)
+	done := make(chan bool)
+	go func() {
+		for {
+			resp, err := steamOfResponses.Recv()
+			if err == io.EOF {
+				done <- true //close(done)
+				return
+			}
+			if err != nil {
+				log.Fatalf("can not receive %v", err)
+			}
+			fmt.Println("Resp received:", resp.ChatMessage.Message)
+		}
+	}()
+	<-done
+	log.Printf("finished")
+
+	//steamOfResponses.SendMsg(&clientRequest)
 
 	/*
 		for {
