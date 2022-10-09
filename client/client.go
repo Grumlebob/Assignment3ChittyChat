@@ -119,7 +119,7 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 		ChatMessage: &pb.ChatMessage{
 			Message:     message,
 			Userid:      userId,
-			LamportTime: 0,
+			LamportTime: lamportTime,
 		},
 	}
 	//Handles the response in "JoinChat loop", so just discard here.
