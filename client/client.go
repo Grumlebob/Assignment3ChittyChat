@@ -46,7 +46,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		go sendMessage(client, context, scanner.Text())
-		fmt.Println("Please enter message:")
+		//fmt.Println("Please enter message:")
 	}
 }
 
@@ -64,7 +64,7 @@ func getClientId(client pb.ChatServiceClient, context context.Context) {
 	}
 
 	userId = user.ChatMessage.Userid
-	fmt.Println("Hello! - You are ID: ", userId)
+	log.Println("Hello! - You are ID: ", userId)
 }
 
 func joinChat(client pb.ChatServiceClient, context context.Context) {
