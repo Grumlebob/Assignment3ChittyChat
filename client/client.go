@@ -16,6 +16,7 @@ import (
 )
 
 var userId int32
+var lamportTime = int64(0)
 
 func main() {
 	// Create a virtual RPC Client Connection on port 9080
@@ -35,13 +36,13 @@ func main() {
 	//Blocking, to get client ID
 	getClientId(client, context)
 
-	//Enables client to leave with ctrl+c
+	//Enables client to leave with message: leave()
 	defer leaveChat(client, context)
 
 	//Non-blocking, to enable client to send messages
 	go joinChat(client, context)
 
-	fmt.Println("Enter 'leave()' to leave the chatroom or use hotkey ctrl+c \nEnter your message here:")
+	fmt.Println("Enter 'leave()' to leave the chatroom. \nEnter your message here:")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		go sendMessage(client, context, scanner.Text())
@@ -94,6 +95,14 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 			if err != nil {
 				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
 			}
+			if userId != message.Userid {
+				if message.LamportTime > lamportTime {
+					lamportTime = message.LamportTime + 1
+				} else {
+					lamportTime++
+				}
+				fmt.Println("Lamport time now:", lamportTime)
+			}
 			log.Println("User:", message.Userid, "- Lamport time:", message.LamportTime, "- Msg:", message.Message)
 		}
 	}()
@@ -113,7 +122,7 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 			LamportTime: 0,
 		},
 	}
-	//Handles the response in "JoinChat loop"
+	//Handles the response in "JoinChat loop", so just discard here.
 	_, err := client.PublishMessage(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Opening stream: %s", err)
@@ -131,22 +140,14 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 		},
 	}
 
-	fmt.Println("NÅEDE HER TIL0")
 	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
-	sendMessage(client, context, leaveString)
-	fmt.Println("NÅEDE HER TIL1")
+	go sendMessage(client, context, leaveString)
 
 	reponse, err := client.LeaveChat(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Error when leaving chat: %s", err)
 	}
 
-	fmt.Println("Client ", userId, " left chat with response: ", reponse)
-
-	fmt.Println("NÅEDE HER TIL2")
-
-	fmt.Println("NÅEDE HER TIL3")
-
-	log.Println("Client ", userId, " left chat")
+	log.Println("Client ", userId, " left chat with response", reponse)
 	os.Exit(0)
 }
