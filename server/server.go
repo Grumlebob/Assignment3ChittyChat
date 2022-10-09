@@ -67,7 +67,8 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
 func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatService_PublishMessageServer) error {
-	fmt.Println("Server publishish message from user: ", clientMessage.ChatMessage.Userid, "Message:", clientMessage.ChatMessage.Message)
+
+	//fmt.Println("Server publish message from user: ", clientMessage.ChatMessage.Userid, "Message:", clientMessage.ChatMessage.Message)
 
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		s.messageChannels[clientMessage.ChatMessage.Userid] = make(chan *pb.ChatMessage)
@@ -83,9 +84,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	}
 
 	//broadcast to all channels
-	fmt.Println("enter broadcasting")
 	totalUsers := len(s.messageChannels)
-	fmt.Println("Total users: ", len(s.messageChannels))
 	for _, channels := range s.messageChannels {
 		totalUsers--
 		channels <- response.ChatMessage
@@ -93,21 +92,19 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 			break
 		}
 	}
-	fmt.Println("Left broadcasting")
 	return nil
 }
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
 func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService_JoinChatServer) error {
-	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid)
 
 	//If user doesn't have a channel
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		messageChannel := make(chan *pb.ChatMessage)
 		s.messageChannels[clientMessage.ChatMessage.Userid] = messageChannel
-		fmt.Println("Added user chan to map.", clientMessage.ChatMessage.Userid)
 	}
 
+	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid, "Total users: ", len(s.messageChannels))
 	////Keep them in chatroom until they leave.
 	for {
 		select {

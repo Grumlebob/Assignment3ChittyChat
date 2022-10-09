@@ -43,7 +43,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		fmt.Println("Please enter message:")
-		sendMessage(client, context, scanner.Text())
+		go sendMessage(client, context, scanner.Text())
 	}
 }
 
@@ -99,7 +99,7 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
-	fmt.Println("Client ", userId, " attempts to send message: ", message)
+	//fmt.Println("Client ", userId, " attempts to send message: ", message)
 
 	if message == "leave()" {
 		leaveChat(client, context)
