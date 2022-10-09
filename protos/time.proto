@@ -26,7 +26,7 @@ option go_package = "https://github.com/Grumlebob/Assignment3ChittyChat/tree/mas
 service ChatService {
     rpc GetClientId(ClientRequest) returns (ServerResponse) {}
     rpc JoinChat(ClientRequest) returns (stream ChatMessage) {}
-    rpc LeaveChat(ClientRequest) returns (stream ServerResponse) {}
+    rpc LeaveChat(ClientRequest) returns (ServerResponse) {}
     rpc PublishMessage(ClientRequest) returns (stream ServerResponse) {}
 }
 

@@ -98,7 +98,6 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
-	//fmt.Println("Client ", userId, " attempts to send message: ", message)
 
 	if message == "leave()" {
 		leaveChat(client, context)
@@ -120,6 +119,8 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 	for {
 		message, err := stream.Recv()
 		if err == io.EOF {
+			//Går ind her uanset hvad. Vi bruger ikke streamen her, fordi vi håndtere det i joinChat.
+			fmt.Println("Server closed stream")
 			break
 		}
 		if err != nil {
@@ -132,4 +133,5 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {
 	fmt.Println("Client ", userId, " attempts to leave chat")
+
 }
