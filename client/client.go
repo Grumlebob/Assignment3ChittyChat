@@ -80,7 +80,6 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 		log.Fatalf("Error when joining chat server: %s", err)
 	}
 	joinedString := fmt.Sprintf("Participant %d joined Chitty-Chat", userId)
-
 	sendMessage(client, context, joinedString)
 
 	//Keep them in chatroom until they leave.
@@ -122,7 +121,7 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 }
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {
-	fmt.Println("Client ", userId, " attempts to leave chat")
+	//fmt.Println("Client ", userId, " attempts to leave chat")
 
 	clientRequest := &pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{
@@ -132,10 +131,14 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 		},
 	}
 
-	response, err := client.LeaveChat(context, clientRequest)
+	_, err := client.LeaveChat(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Error when leaving chat: %s", err)
 	}
-	fmt.Println("Client ", userId, " left chat: ", response.ChatMessage.Message)
+
+	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
+	sendMessage(client, context, leaveString)
+
+	//fmt.Println("Client ", userId, " left chat: ", response.ChatMessage.Message)
 	os.Exit(0)
 }
