@@ -112,14 +112,11 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 			LamportTime: 0,
 		},
 	}
-
-	response, err := client.PublishMessage(context, clientRequest)
+	//Handles the response in "JoinChat loop"
+	_, err := client.PublishMessage(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Opening stream: %s", err)
 	}
-
-	log.Println(response.ChatMessage.Userid, " sent: ", response.ChatMessage.Message, " at Lamport time: ", response.ChatMessage.LamportTime)
-
 }
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {

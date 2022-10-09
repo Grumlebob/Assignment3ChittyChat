@@ -78,7 +78,6 @@ func (s *Server) PublishMessage(ctx context.Context, clientMessage *pb.ClientReq
 			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}
-	//Todo - vi bruger ikke stream i denne metode.
 
 	//broadcast to all channels
 	for _, channels := range s.messageChannels {
@@ -91,10 +90,16 @@ func (s *Server) PublishMessage(ctx context.Context, clientMessage *pb.ClientReq
 func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService_JoinChatServer) error {
 	//If user doesn't have a channel
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
-		messageChannel := make(chan *pb.ChatMessage)
-		s.messageChannels[clientMessage.ChatMessage.Userid] = messageChannel
+		s.messageChannels[clientMessage.ChatMessage.Userid] = make(chan *pb.ChatMessage)
 	}
-	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid, "Total users: ", len(s.messageChannels))
+	enteredMessage := fmt.Sprint("User joined chat: ", clientMessage.ChatMessage.Userid, "Total users: ", len(s.messageChannels))
+	chatmsg := &pb.ChatMessage{
+		Message:     enteredMessage,
+		Userid:      clientMessage.ChatMessage.Userid,
+		LamportTime: clientMessage.ChatMessage.LamportTime,
+	}
+	log.Println(enteredMessage)
+	stream.Send(chatmsg)
 	////Keep them in chatroom until they leave.
 	for {
 		select {
