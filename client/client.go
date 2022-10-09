@@ -95,14 +95,14 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 			if err != nil {
 				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
 			}
-			if userId != message.Userid {
-				if message.LamportTime > lamportTime {
-					lamportTime = message.LamportTime + 1
-				} else {
-					lamportTime++
-				}
-				fmt.Println("Lamport time now:", lamportTime)
+			//if userId != message.Userid {
+			if message.LamportTime > lamportTime {
+				lamportTime = message.LamportTime + 1
+			} else {
+				lamportTime++
 			}
+			fmt.Println("Lamport time now:", lamportTime)
+			//}
 			log.Println("User:", message.Userid, "- Lamport time:", message.LamportTime, "- Msg:", message.Message)
 		}
 	}()
