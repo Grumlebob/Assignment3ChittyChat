@@ -21,7 +21,7 @@ var lamportTime = int64(0)
 func main() {
 	// Create a virtual RPC Client Connection on port 9080
 	var conn *grpc.ClientConn
-	context, cancelFunction := context.WithTimeout(context.Background(), time.Second*200) //standard er 5
+	context, cancelFunction := context.WithTimeout(context.Background(), time.Second*9999) //standard er 5
 	defer cancelFunction()
 	// IPv4:port = "172.30.48.1:9080"
 	conn, err := grpc.DialContext(context, ":9080", grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -110,6 +110,8 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
+	lamportTime++
+
 	if message == "leave()" {
 		leaveChat(client, context)
 		return
