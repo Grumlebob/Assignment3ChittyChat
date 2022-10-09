@@ -97,7 +97,6 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 		}
 	}()
 	<-loopForever
-
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
