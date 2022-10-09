@@ -92,14 +92,14 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		s.messageChannels[clientMessage.ChatMessage.Userid] = make(chan *pb.ChatMessage)
 	}
-	enteredMessage := fmt.Sprint("User joined chat: ", clientMessage.ChatMessage.Userid, " Total users: ", len(s.messageChannels))
+	/* enteredMessage := fmt.Sprint("User joined chat: ", clientMessage.ChatMessage.Userid, " Total users: ", len(s.messageChannels))
 	chatmsg := &pb.ChatMessage{
 		Message:     enteredMessage,
 		Userid:      clientMessage.ChatMessage.Userid,
 		LamportTime: clientMessage.ChatMessage.LamportTime,
 	}
 	log.Println(enteredMessage)
-	stream.Send(chatmsg)
+	stream.Send(chatmsg) */
 	////Keep them in chatroom until they leave.
 	for {
 		select {
