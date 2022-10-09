@@ -35,6 +35,8 @@ func main() {
 	//Blocking, to get client ID
 	getClientId(client, context)
 
+	defer leaveChat(client, context)
+
 	//Non-blocking, to enable client to send messages
 	go joinChat(client, context)
 
@@ -147,4 +149,5 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 		log.Fatalf("Error when leaving chat: %s", err)
 	}
 	fmt.Println("Client ", userId, " left chat: ", response.ChatMessage.Message)
+	os.Exit(0)
 }

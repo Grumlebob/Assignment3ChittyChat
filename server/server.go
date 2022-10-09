@@ -114,7 +114,6 @@ func (s *Server) LeaveChat(ctx context.Context, clientMessage *pb.ClientRequest)
 	lengthbefore := len(s.messageChannels)
 	delete(s.messageChannels, clientMessage.ChatMessage.Userid)
 	lengthafter := len(s.messageChannels)
-
 	fmt.Println("before:", lengthbefore, " - after:", lengthafter)
 
 	return &pb.ServerResponse{
