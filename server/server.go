@@ -116,8 +116,6 @@ func (s *Server) LeaveChat(ctx context.Context, clientMessage *pb.ClientRequest)
 	delete(s.messageChannels, clientMessage.ChatMessage.Userid)
 	log.Println("User left chat: ", clientMessage.ChatMessage.Userid, "Total users: ", len(s.messageChannels))
 
-	s.PublishMessage(ctx, clientMessage)
-
 	return &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
 			Message:     clientMessage.ChatMessage.Message,
