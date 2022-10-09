@@ -40,7 +40,7 @@ func main() {
 	//Non-blocking, to enable client to send messages
 	go joinChat(client, context)
 
-	fmt.Println("Enter 'leave()' to leave the chatroom. Enter your message here:")
+	fmt.Println("Enter 'leave()' to leave the chatroom or use hotkey ctrl+c \nEnter your message here:")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		go sendMessage(client, context, scanner.Text())
@@ -122,7 +122,6 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 		message, err := stream.Recv()
 		if err == io.EOF {
 			//Går ind her uanset hvad. Vi bruger ikke streamen her, fordi vi håndtere det i joinChat.
-			fmt.Println("Server closed stream")
 			break
 		}
 		if err != nil {
