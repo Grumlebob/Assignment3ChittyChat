@@ -110,33 +110,18 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 }
 
 func (s *Server) LeaveChat(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
-	//If user exists:
-	if s.messageChannels[clientMessage.ChatMessage.Userid] != nil {
-		fmt.Println("User exists with ID: ", clientMessage.ChatMessage.Userid)
-		return &pb.ServerResponse{
-			ChatMessage: &pb.ChatMessage{
-				Message:     clientMessage.ChatMessage.Message,
-				Userid:      clientMessage.ChatMessage.Userid,
-				LamportTime: clientMessage.ChatMessage.LamportTime,
-			},
-		}, nil
-	}
-	//If user doesn't exist:
+	//Remove map entry for user
+	lengthbefore := len(s.messageChannels)
+	s.messageChannels[clientMessage.ChatMessage.Userid] = nil
+	lengthafter := len(s.messageChannels)
 
-	idgenerator := rand.Intn(math.MaxInt32)
-	for {
-		if s.messageChannels[int32(idgenerator)] == nil {
-			break
-		}
-		idgenerator = rand.Intn(math.MaxInt32)
-	}
-	fmt.Println("generated new user with ID:", idgenerator)
+	fmt.Println("before:", lengthbefore, " - after:", lengthafter)
 
 	return &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
-			Message:     "Client ID: " + string(idgenerator),
-			Userid:      int32(idgenerator),
-			LamportTime: 0,
+			Message:     clientMessage.ChatMessage.Message,
+			Userid:      clientMessage.ChatMessage.Userid,
+			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}, nil
 }

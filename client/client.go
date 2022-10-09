@@ -134,4 +134,17 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 func leaveChat(client pb.ChatServiceClient, context context.Context) {
 	fmt.Println("Client ", userId, " attempts to leave chat")
 
+	clientRequest := &pb.ClientRequest{
+		ChatMessage: &pb.ChatMessage{
+			Message:     "leave()",
+			Userid:      userId,
+			LamportTime: 0,
+		},
+	}
+
+	response, err := client.LeaveChat(context, clientRequest)
+	if err != nil {
+		log.Fatalf("Error when leaving chat: %s", err)
+	}
+	fmt.Println("Client ", userId, " left chat: ", response.ChatMessage.Message)
 }
