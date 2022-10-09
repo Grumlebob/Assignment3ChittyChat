@@ -16,8 +16,22 @@ import (
 
 type Server struct {
 	pb.ChatServiceServer
-	messageChannels  map[int32]*pb.ChatService_PublishMessageServer
-	messageChannels2 map[int32]chan *pb.ChatMessage //NÅEDE HER TIL. Check Nad: JoinRoom
+	messageChannels map[int32]chan *pb.ChatMessage
+}
+
+func main() {
+	// Create listener tcp on port 9080
+	listener, err := net.Listen("tcp", ":9080")
+	if err != nil {
+		log.Fatalf("Failed to listen on port 9080: %v", err)
+	}
+	grpcServer := grpc.NewServer()
+	pb.RegisterChatServiceServer(grpcServer, &Server{
+		messageChannels: make(map[int32]chan *pb.ChatMessage),
+	})
+	if err := grpcServer.Serve(listener); err != nil {
+		log.Fatalf("failed to server %v", err)
+	}
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
@@ -37,7 +51,6 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
-			//s.messageChannels[int32(idgenerator)] = &pb.ChatService_PublishMessageServer{}
 			break
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
@@ -58,7 +71,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	fmt.Println("Server publishish message from user: ", clientMessage.ChatMessage.Userid, "Message:", clientMessage.ChatMessage.Message)
 
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
-		s.messageChannels[clientMessage.ChatMessage.Userid] = &stream
+		s.messageChannels[clientMessage.ChatMessage.Userid] = make(chan *pb.ChatMessage)
 		fmt.Println("Added user stream to map.", clientMessage.ChatMessage.Userid)
 	}
 
@@ -74,14 +87,9 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	fmt.Println("enter broadcasting")
 	totalUsers := len(s.messageChannels)
 	fmt.Println("Total users: ", len(s.messageChannels))
-	for i, streams := range s.messageChannels {
+	for _, channels := range s.messageChannels {
 		totalUsers--
-		fmt.Println("Broadcasting to user: ", i)
-		streamPointer := *streams
-		if err := streamPointer.Send(response); err != nil {
-			log.Printf("send error %v", err)
-		}
-		fmt.Println("Reamining users to broadcast to: ", totalUsers)
+		channels <- response.ChatMessage
 		if totalUsers == 0 {
 			break
 		}
@@ -94,36 +102,19 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService_JoinChatServer) error {
 	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid)
 
-	messageChannel := make(chan *pb.ChatMessage)
-
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
-		//s.messageChannels[clientMessage.ChatMessage.Userid] = &stream
-		fmt.Println("Added user stream to map.", clientMessage.ChatMessage.Userid)
+		messageChannel := make(chan *pb.ChatMessage)
+		s.messageChannels[clientMessage.ChatMessage.Userid] = messageChannel
+		fmt.Println("Added user chan to map.", clientMessage.ChatMessage.Userid)
 	}
 
+	////Keep them in chatroom until they leave.
 	for {
 		select {
 		case <-stream.Context().Done():
 			return nil
-		case message := <-messageChannel:
-			//stream.Send(message)
+		case message := <-s.messageChannels[clientMessage.ChatMessage.Userid]:
+			stream.Send(message)
 		}
-	}
-
-	return nil
-}
-
-func main() {
-	// Create listener tcp on port 9080
-	listener, err := net.Listen("tcp", ":9080")
-	if err != nil {
-		log.Fatalf("Failed to listen on port 9080: %v", err)
-	}
-	grpcServer := grpc.NewServer()
-	pb.RegisterChatServiceServer(grpcServer, &Server{
-		messageChannels: make(map[int32]*pb.ChatService_PublishMessageServer),
-	})
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("failed to server %v", err)
 	}
 }

@@ -35,6 +35,8 @@ func main() {
 	getClientId(client, context)
 	//Indsæt join chat methods
 
+	go joinChat(client, context)
+
 	sendMessage(client, context, "hello 1")
 	//sendMessage(client, context, "hello 2")
 	//sendMessage(client, context, "hello 3")
@@ -60,6 +62,40 @@ func getClientId(client pb.ChatServiceClient, context context.Context) {
 
 	userId = user.ChatMessage.Userid
 	fmt.Println("Hello! - You are ID: ", userId)
+}
+
+func joinChat(client pb.ChatServiceClient, context context.Context) {
+	clientRequest := pb.ClientRequest{
+		ChatMessage: &pb.ChatMessage{
+			Message:     "New User",
+			Userid:      userId,
+			LamportTime: 0,
+		},
+	}
+
+	stream, err := client.JoinChat(context, &clientRequest)
+	if err != nil {
+		log.Fatalf("Error when joining chat server: %s", err)
+	}
+	fmt.Println("User ", clientRequest.ChatMessage.Userid, " joined the chat")
+
+	//Keep them in chatroom until they leave.
+	loopForever := make(chan struct{})
+	go func() {
+		for {
+			message, err := stream.Recv()
+			if err == io.EOF {
+				close(loopForever)
+				return
+			}
+			if err != nil {
+				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
+			}
+			log.Println(message)
+		}
+	}()
+	<-loopForever
+
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {

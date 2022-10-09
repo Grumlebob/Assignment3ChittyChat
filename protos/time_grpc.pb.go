@@ -61,7 +61,7 @@ func (c *chatServiceClient) JoinChat(ctx context.Context, in *ClientRequest, opt
 }
 
 type ChatService_JoinChatClient interface {
-	Recv() (*ServerResponse, error)
+	Recv() (*ChatMessage, error)
 	grpc.ClientStream
 }
 
@@ -69,8 +69,8 @@ type chatServiceJoinChatClient struct {
 	grpc.ClientStream
 }
 
-func (x *chatServiceJoinChatClient) Recv() (*ServerResponse, error) {
-	m := new(ServerResponse)
+func (x *chatServiceJoinChatClient) Recv() (*ChatMessage, error) {
+	m := new(ChatMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -208,7 +208,7 @@ func _ChatService_JoinChat_Handler(srv interface{}, stream grpc.ServerStream) er
 }
 
 type ChatService_JoinChatServer interface {
-	Send(*ServerResponse) error
+	Send(*ChatMessage) error
 	grpc.ServerStream
 }
 
@@ -216,7 +216,7 @@ type chatServiceJoinChatServer struct {
 	grpc.ServerStream
 }
 
-func (x *chatServiceJoinChatServer) Send(m *ServerResponse) error {
+func (x *chatServiceJoinChatServer) Send(m *ChatMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
