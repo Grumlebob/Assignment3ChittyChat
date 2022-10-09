@@ -100,7 +100,7 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 	//	LamportTime: clientMessage.ChatMessage.LamportTime,
 	//}
 
-	log.Println(clientMessage.ChatMessage.Message)
+	log.Println(clientMessage.ChatMessage.Message, " Total users: ", len(s.messageChannels))
 	//stream.Send(chatmsg)
 	////Keep them in chatroom until they leave.
 	for {

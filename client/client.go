@@ -144,11 +144,11 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
 	go sendMessage(client, context, leaveString)
 
-	reponse, err := client.LeaveChat(context, clientRequest)
+	_, err := client.LeaveChat(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Error when leaving chat: %s", err)
 	}
 
-	log.Println("Client ", userId, " left chat with response", reponse)
+	//log.Println("Client ", userId, " left chat with response", reponse)
 	os.Exit(0)
 }
