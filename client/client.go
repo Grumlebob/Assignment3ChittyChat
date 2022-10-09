@@ -70,7 +70,7 @@ func getClientId(client pb.ChatServiceClient, context context.Context) {
 func joinChat(client pb.ChatServiceClient, context context.Context) {
 	clientRequest := pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{
-			Message:     "Participant " + string(userId) + "joined Chitty-Chat",
+			Message:     fmt.Sprint("Participant ", userId, " joined Chitty-Chat"),
 			Userid:      userId,
 			LamportTime: lamportTime,
 		},
