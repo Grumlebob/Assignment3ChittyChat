@@ -79,8 +79,6 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 	if err != nil {
 		log.Fatalf("Error when joining chat server: %s", err)
 	}
-	fmt.Println("User ", clientRequest.ChatMessage.Userid, " joined the chat")
-
 	//Keep them in chatroom until they leave.
 	loopForever := make(chan struct{})
 	go func() {
@@ -93,7 +91,7 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 			if err != nil {
 				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
 			}
-			log.Println("user ", message.Userid, ": ", message.Message, " at Lamport time: ", message.LamportTime)
+			log.Println("User: ", message.Userid, " - ", message.Message, "at Lamport time: ", message.LamportTime)
 		}
 	}()
 	<-loopForever
