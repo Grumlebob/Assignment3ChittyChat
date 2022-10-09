@@ -91,7 +91,7 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 			if err != nil {
 				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
 			}
-			log.Println("User: ", message.Userid, " - ", message.Message, "at Lamport time: ", message.LamportTime)
+			log.Println("User:", message.Userid, "- Lamport time:", message.LamportTime, "- Msg:", message.Message)
 		}
 	}()
 	<-loopForever
