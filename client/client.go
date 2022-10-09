@@ -109,12 +109,11 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
-	lamportTime++
-
 	if message == "leave()" {
 		leaveChat(client, context)
 		return
 	}
+	lamportTime++
 
 	clientRequest := &pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{
@@ -131,7 +130,7 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 }
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {
-	fmt.Println("Client ", userId, " attempts to leave chat")
+	//fmt.Println("Client ", userId, " attempts to leave chat")
 
 	clientRequest := &pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{

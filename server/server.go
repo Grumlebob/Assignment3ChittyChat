@@ -93,15 +93,8 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 		s.messageChannels[clientMessage.ChatMessage.Userid] = make(chan *pb.ChatMessage)
 	}
 
-	//enteredMessage := fmt.Sprint("User joined chat: ", clientMessage.ChatMessage.Userid, " Total users: ", len(s.messageChannels))
-	//chatmsg := &pb.ChatMessage{
-	//	Message:     enteredMessage,
-	//	Userid:      clientMessage.ChatMessage.Userid,
-	//	LamportTime: clientMessage.ChatMessage.LamportTime,
-	//}
-
 	log.Println(clientMessage.ChatMessage.Message, " Total users: ", len(s.messageChannels))
-	//stream.Send(chatmsg)
+
 	////Keep them in chatroom until they leave.
 	for {
 		select {
@@ -116,7 +109,7 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 func (s *Server) LeaveChat(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
 	//Remove map entry for user
 	delete(s.messageChannels, clientMessage.ChatMessage.Userid)
-	log.Println("Participant ", clientMessage.ChatMessage.Userid, " left Chitty-Chat.", " Total users: ", len(s.messageChannels))
+	log.Println("Participant", clientMessage.ChatMessage.Userid, "left Chitty-Chat.", "Total users: ", len(s.messageChannels))
 
 	return &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
