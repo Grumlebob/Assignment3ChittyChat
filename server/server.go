@@ -112,7 +112,7 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 func (s *Server) LeaveChat(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
 	//Remove map entry for user
 	lengthbefore := len(s.messageChannels)
-	s.messageChannels[clientMessage.ChatMessage.Userid] = nil
+	delete(s.messageChannels, clientMessage.ChatMessage.Userid)
 	lengthafter := len(s.messageChannels)
 
 	fmt.Println("before:", lengthbefore, " - after:", lengthafter)
