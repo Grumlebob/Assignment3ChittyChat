@@ -59,7 +59,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 		ChatMessage: &pb.ChatMessage{
 			Message:     "Client ID: " + string(idgenerator),
 			Userid:      int32(idgenerator),
-			LamportTime: 0,
+			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
 	}, nil
 }

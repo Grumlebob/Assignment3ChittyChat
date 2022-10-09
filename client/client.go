@@ -55,7 +55,7 @@ func getClientId(client pb.ChatServiceClient, context context.Context) {
 		ChatMessage: &pb.ChatMessage{
 			Message:     "New User",
 			Userid:      userId,
-			LamportTime: 0,
+			LamportTime: lamportTime,
 		},
 	}
 	user, err := client.GetClientId(context, &clientRequest)
@@ -72,7 +72,7 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 		ChatMessage: &pb.ChatMessage{
 			Message:     "New User",
 			Userid:      userId,
-			LamportTime: 0,
+			LamportTime: lamportTime,
 		},
 	}
 
@@ -136,7 +136,7 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 		ChatMessage: &pb.ChatMessage{
 			Message:     "leave()",
 			Userid:      userId,
-			LamportTime: 0,
+			LamportTime: lamportTime,
 		},
 	}
 
