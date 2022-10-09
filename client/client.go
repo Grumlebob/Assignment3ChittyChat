@@ -121,7 +121,7 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 }
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {
-	//fmt.Println("Client ", userId, " attempts to leave chat")
+	fmt.Println("Client ", userId, " attempts to leave chat")
 
 	clientRequest := &pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{
@@ -137,7 +137,7 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 	}
 
 	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
-	sendMessage(client, context, leaveString)
+	go sendMessage(client, context, leaveString)
 
 	//fmt.Println("Client ", userId, " left chat: ", response.ChatMessage.Message)
 	os.Exit(0)
