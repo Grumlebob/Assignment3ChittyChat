@@ -131,13 +131,21 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 		},
 	}
 
-	_, err := client.LeaveChat(context, clientRequest)
+	fmt.Println("NÅEDE HER TIL0")
+	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
+	sendMessage(client, context, leaveString)
+	fmt.Println("NÅEDE HER TIL1")
+
+	reponse, err := client.LeaveChat(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Error when leaving chat: %s", err)
 	}
 
-	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
-	sendMessage(client, context, leaveString)
+	fmt.Println("Client ", userId, " left chat with response: ", reponse)
+
+	fmt.Println("NÅEDE HER TIL2")
+
+	fmt.Println("NÅEDE HER TIL3")
 
 	log.Println("Client ", userId, " left chat")
 	os.Exit(0)
