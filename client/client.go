@@ -35,6 +35,7 @@ func main() {
 	//Blocking, to get client ID
 	getClientId(client, context)
 
+	//Enables client to leave with ctrl+c
 	defer leaveChat(client, context)
 
 	//Non-blocking, to enable client to send messages

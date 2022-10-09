@@ -46,7 +46,6 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 		}, nil
 	}
 	//If user doesn't exist:
-
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
@@ -90,13 +89,11 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
 func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService_JoinChatServer) error {
-
 	//If user doesn't have a channel
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		messageChannel := make(chan *pb.ChatMessage)
 		s.messageChannels[clientMessage.ChatMessage.Userid] = messageChannel
 	}
-
 	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid, "Total users: ", len(s.messageChannels))
 	////Keep them in chatroom until they leave.
 	for {
