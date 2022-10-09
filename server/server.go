@@ -65,7 +65,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 }
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC
-func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatService_PublishMessageServer) error {
+func (s *Server) PublishMessage(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
 
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		s.messageChannels[clientMessage.ChatMessage.Userid] = make(chan *pb.ChatMessage)
@@ -84,7 +84,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	for _, channels := range s.messageChannels {
 		channels <- response.ChatMessage
 	}
-	return nil
+	return response, nil
 }
 
 // rpc ListFeatures(Rectangle) returns (stream Feature) {} eksempelt. A server-side streaming RPC

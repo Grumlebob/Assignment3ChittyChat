@@ -93,14 +93,13 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 			if err != nil {
 				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
 			}
-			log.Println("user ", message.Userid, ": ", message.Message)
+			log.Println("user ", message.Userid, ": ", message.Message, " at Lamport time: ", message.LamportTime)
 		}
 	}()
 	<-loopForever
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
-
 	if message == "leave()" {
 		leaveChat(client, context)
 		return
@@ -114,22 +113,13 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 		},
 	}
 
-	stream, err := client.PublishMessage(context, clientRequest)
+	response, err := client.PublishMessage(context, clientRequest)
 	if err != nil {
 		log.Fatalf("Opening stream: %s", err)
 	}
-	for {
-		message, err := stream.Recv()
-		if err == io.EOF {
-			//Går ind her uanset hvad. Vi bruger ikke streamen her, fordi vi håndtere det i joinChat.
-			break
-		}
-		if err != nil {
-			log.Fatalf("%v.PublishMessage(_) = _, %v", client, err)
-		}
-		fmt.Println("Kom her til. Tror aldrig det sker, evt fjern linjen under.")
-		log.Println(message.ChatMessage.Userid, " says: ", message.ChatMessage.Message)
-	}
+
+	log.Println(response.ChatMessage.Userid, " sent: ", response.ChatMessage.Message, " at Lamport time: ", response.ChatMessage.LamportTime)
+
 }
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {

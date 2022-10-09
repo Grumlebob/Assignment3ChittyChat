@@ -25,7 +25,7 @@ type ChatServiceClient interface {
 	GetClientId(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error)
 	JoinChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_JoinChatClient, error)
 	LeaveChat(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error)
-	PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_PublishMessageClient, error)
+	PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error)
 }
 
 type chatServiceClient struct {
@@ -86,36 +86,13 @@ func (c *chatServiceClient) LeaveChat(ctx context.Context, in *ClientRequest, op
 	return out, nil
 }
 
-func (c *chatServiceClient) PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (ChatService_PublishMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ChatService_ServiceDesc.Streams[1], "/protos.ChatService/PublishMessage", opts...)
+func (c *chatServiceClient) PublishMessage(ctx context.Context, in *ClientRequest, opts ...grpc.CallOption) (*ServerResponse, error) {
+	out := new(ServerResponse)
+	err := c.cc.Invoke(ctx, "/protos.ChatService/PublishMessage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &chatServicePublishMessageClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type ChatService_PublishMessageClient interface {
-	Recv() (*ServerResponse, error)
-	grpc.ClientStream
-}
-
-type chatServicePublishMessageClient struct {
-	grpc.ClientStream
-}
-
-func (x *chatServicePublishMessageClient) Recv() (*ServerResponse, error) {
-	m := new(ServerResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // ChatServiceServer is the server API for ChatService service.
@@ -125,7 +102,7 @@ type ChatServiceServer interface {
 	GetClientId(context.Context, *ClientRequest) (*ServerResponse, error)
 	JoinChat(*ClientRequest, ChatService_JoinChatServer) error
 	LeaveChat(context.Context, *ClientRequest) (*ServerResponse, error)
-	PublishMessage(*ClientRequest, ChatService_PublishMessageServer) error
+	PublishMessage(context.Context, *ClientRequest) (*ServerResponse, error)
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -142,8 +119,8 @@ func (UnimplementedChatServiceServer) JoinChat(*ClientRequest, ChatService_JoinC
 func (UnimplementedChatServiceServer) LeaveChat(context.Context, *ClientRequest) (*ServerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
 }
-func (UnimplementedChatServiceServer) PublishMessage(*ClientRequest, ChatService_PublishMessageServer) error {
-	return status.Errorf(codes.Unimplemented, "method PublishMessage not implemented")
+func (UnimplementedChatServiceServer) PublishMessage(context.Context, *ClientRequest) (*ServerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishMessage not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
 
@@ -215,25 +192,22 @@ func _ChatService_LeaveChat_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_PublishMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ClientRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _ChatService_PublishMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(ChatServiceServer).PublishMessage(m, &chatServicePublishMessageServer{stream})
-}
-
-type ChatService_PublishMessageServer interface {
-	Send(*ServerResponse) error
-	grpc.ServerStream
-}
-
-type chatServicePublishMessageServer struct {
-	grpc.ServerStream
-}
-
-func (x *chatServicePublishMessageServer) Send(m *ServerResponse) error {
-	return x.ServerStream.SendMsg(m)
+	if interceptor == nil {
+		return srv.(ChatServiceServer).PublishMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.ChatService/PublishMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).PublishMessage(ctx, req.(*ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // ChatService_ServiceDesc is the grpc.ServiceDesc for ChatService service.
@@ -251,16 +225,15 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "LeaveChat",
 			Handler:    _ChatService_LeaveChat_Handler,
 		},
+		{
+			MethodName: "PublishMessage",
+			Handler:    _ChatService_PublishMessage_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "JoinChat",
 			Handler:       _ChatService_JoinChat_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "PublishMessage",
-			Handler:       _ChatService_PublishMessage_Handler,
 			ServerStreams: true,
 		},
 	},
