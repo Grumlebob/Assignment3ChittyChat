@@ -32,17 +32,17 @@ func main() {
 	//  Create new Client from generated gRPC code from proto
 	client := pb.NewChatServiceClient(conn)
 
+	//Blocking, to get client ID
 	getClientId(client, context)
-	//Indsæt join chat methods
 
+	//Non-blocking, to enable client to send messages
 	go joinChat(client, context)
 
-	sendMessage(client, context, "hello 1")
-	//sendMessage(client, context, "hello 2")
-	//sendMessage(client, context, "hello 3")
+	fmt.Println("Enter 'leave()' to leave the chatroom")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
+		fmt.Println("Please enter message:")
 		sendMessage(client, context, scanner.Text())
 	}
 }
@@ -101,6 +101,11 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
 	fmt.Println("Client ", userId, " attempts to send message: ", message)
 
+	if message == "leave()" {
+		leaveChat(client, context)
+		return
+	}
+
 	clientRequest := &pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{
 			Message:     message,
@@ -123,4 +128,8 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 		}
 		log.Println(message)
 	}
+}
+
+func leaveChat(client pb.ChatServiceClient, context context.Context) {
+	fmt.Println("Client ", userId, " attempts to leave chat")
 }

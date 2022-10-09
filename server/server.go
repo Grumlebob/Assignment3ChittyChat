@@ -7,7 +7,6 @@ import (
 	"math"
 	"math/rand"
 	"net"
-	"time"
 
 	pb "github.com/Grumlebob/Assignment3ChittyChat/protos"
 
@@ -35,7 +34,6 @@ func main() {
 }
 
 func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
-	fmt.Println("Server pinged:", time.Now(), "by client:", clientMessage.ChatMessage.Userid)
 	//If user exists:
 	if s.messageChannels[clientMessage.ChatMessage.Userid] != nil {
 		fmt.Println("User exists with ID: ", clientMessage.ChatMessage.Userid)
@@ -48,6 +46,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 		}, nil
 	}
 	//If user doesn't exist:
+
 	idgenerator := rand.Intn(math.MaxInt32)
 	for {
 		if s.messageChannels[int32(idgenerator)] == nil {
@@ -102,6 +101,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService_JoinChatServer) error {
 	fmt.Println("User joined chat: ", clientMessage.ChatMessage.Userid)
 
+	//If user doesn't have a channel
 	if s.messageChannels[clientMessage.ChatMessage.Userid] == nil {
 		messageChannel := make(chan *pb.ChatMessage)
 		s.messageChannels[clientMessage.ChatMessage.Userid] = messageChannel
