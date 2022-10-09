@@ -125,7 +125,7 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 		if err != nil {
 			log.Fatalf("%v.PublishMessage(_) = _, %v", client, err)
 		}
-		log.Println(message)
+		log.Println(message.ChatMessage.Userid, " says: ", message.ChatMessage.Message)
 	}
 }
 

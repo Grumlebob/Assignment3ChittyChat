@@ -77,7 +77,7 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 
 	response := &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
-			Message:     "Message sent: " + clientMessage.ChatMessage.Message,
+			Message:     clientMessage.ChatMessage.Message,
 			Userid:      clientMessage.ChatMessage.Userid,
 			LamportTime: clientMessage.ChatMessage.LamportTime,
 		},
