@@ -53,7 +53,7 @@ func (s *Server) GetClientId(ctx context.Context, clientMessage *pb.ClientReques
 		}
 		idgenerator = rand.Intn(math.MaxInt32)
 	}
-	fmt.Println("generated new user with ID:", idgenerator)
+	//fmt.Println("generated new user with ID:", idgenerator)
 
 	return &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
