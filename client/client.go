@@ -38,12 +38,11 @@ func main() {
 	//Non-blocking, to enable client to send messages
 	go joinChat(client, context)
 
-	fmt.Println("Enter 'leave()' to leave the chatroom")
-
+	fmt.Println("Enter 'leave()' to leave the chatroom. Enter your message here:")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		fmt.Println("Please enter message:")
 		go sendMessage(client, context, scanner.Text())
+		fmt.Println("Please enter message:")
 	}
 }
 
