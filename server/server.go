@@ -116,7 +116,7 @@ func (s *Server) JoinChat(clientMessage *pb.ClientRequest, stream pb.ChatService
 func (s *Server) LeaveChat(ctx context.Context, clientMessage *pb.ClientRequest) (*pb.ServerResponse, error) {
 	//Remove map entry for user
 	delete(s.messageChannels, clientMessage.ChatMessage.Userid)
-	log.Println("User left chat: ", clientMessage.ChatMessage.Userid, "Total users: ", len(s.messageChannels))
+	log.Println("Participant ", clientMessage.ChatMessage.Userid, " left Chitty-Chat.", " Total users: ", len(s.messageChannels))
 
 	return &pb.ServerResponse{
 		ChatMessage: &pb.ChatMessage{
