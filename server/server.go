@@ -81,13 +81,13 @@ func (s *Server) PublishMessage(clientMessage *pb.ClientRequest, stream pb.ChatS
 	}
 
 	//broadcast to all channels
-	totalUsers := len(s.messageChannels)
+	//totalUsers := len(s.messageChannels)
 	for _, channels := range s.messageChannels {
-		totalUsers--
+		//totalUsers--
 		channels <- response.ChatMessage
-		if totalUsers == 0 {
-			break
-		}
+		//if totalUsers == 0 {
+		//	break
+		//}
 	}
 	return nil
 }
