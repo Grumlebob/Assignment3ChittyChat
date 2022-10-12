@@ -33,6 +33,8 @@ func main() {
 	//  Create new Client from generated gRPC code from proto
 	client := pb.NewChatServiceClient(conn)
 
+	//TODO: glemt maximum lenght of 128 chars. And use something like: log.setflags(log.Llongfile)
+
 	//Blocking, to get client ID
 	getClientId(client, context)
 
