@@ -19,11 +19,13 @@ var userId int32
 var lamportTime = int64(0)
 
 func main() {
+	//Print date and time in log.
+	log.SetFlags(log.LstdFlags)
 	// Create a virtual RPC Client Connection on port 9080
 	var conn *grpc.ClientConn
 	context, cancelFunction := context.WithTimeout(context.Background(), time.Second*9999) //standard er 5
 	defer cancelFunction()
-	// IPv4:port = "172.30.48.1:9080"
+	//format is IPv4:port eg "172.30.48.1:9080"
 	conn, err := grpc.DialContext(context, ":9080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Could not connect: %s", err)
@@ -33,12 +35,10 @@ func main() {
 	//  Create new Client from generated gRPC code from proto
 	client := pb.NewChatServiceClient(conn)
 
-	//TODO: glemt use something like: log.setflags(log.Llongfile)
-
 	//Blocking, to get client ID
 	getClientId(client, context)
 
-	//Enables client to leave with message: leave()
+	//Leave chat on exit.
 	defer leaveChat(client, context)
 
 	//Non-blocking, to enable client to send messages
@@ -52,7 +52,6 @@ func main() {
 		} else {
 			go sendMessage(client, context, scanner.Text())
 		}
-		//fmt.Println("Please enter message:")
 	}
 }
 
@@ -90,12 +89,12 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 	sendMessage(client, context, joinedString)
 
 	//Keep them in chatroom until they leave.
-	loopForever := make(chan struct{})
+	KeepStreamAlive := make(chan struct{})
 	go func() {
 		for {
 			message, err := stream.Recv()
 			if err == io.EOF {
-				close(loopForever)
+				close(KeepStreamAlive)
 				return
 			}
 			if err != nil {
@@ -111,7 +110,7 @@ func joinChat(client pb.ChatServiceClient, context context.Context) {
 			log.Println("User:", message.Userid, "- Lamport time:", lamportTime, "- Msg:", message.Message)
 		}
 	}()
-	<-loopForever
+	<-KeepStreamAlive
 }
 
 func sendMessage(client pb.ChatServiceClient, context context.Context, message string) {
@@ -136,7 +135,6 @@ func sendMessage(client pb.ChatServiceClient, context context.Context, message s
 }
 
 func leaveChat(client pb.ChatServiceClient, context context.Context) {
-	//fmt.Println("Client ", userId, " attempts to leave chat")
 
 	clientRequest := &pb.ClientRequest{
 		ChatMessage: &pb.ChatMessage{
@@ -147,7 +145,7 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 	}
 
 	leaveString := fmt.Sprintf("Participant %d left Chitty-Chat", userId)
-	go sendMessage(client, context, leaveString)
+	sendMessage(client, context, leaveString)
 
 	_, err := client.LeaveChat(context, clientRequest)
 	if err != nil {
