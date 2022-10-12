@@ -152,6 +152,6 @@ func leaveChat(client pb.ChatServiceClient, context context.Context) {
 		log.Fatalf("Error when leaving chat: %s", err)
 	}
 
-	//log.Println("Client ", userId, " left chat with response", reponse)
+	//log.Println("Client ", userId, " left chat with response:", reponse.ChatMessage.Message)
 	os.Exit(0)
 }
