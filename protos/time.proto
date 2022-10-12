@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package protos;
 option go_package = "https://github.com/Grumlebob/Assignment3ChittyChat/tree/master/protos";
+//for exam we can use assignment3chitty/protos instead of github
 
 
 //Important commands:

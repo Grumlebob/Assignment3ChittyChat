@@ -33,7 +33,7 @@ func main() {
 	//  Create new Client from generated gRPC code from proto
 	client := pb.NewChatServiceClient(conn)
 
-	//TODO: glemt maximum lenght of 128 chars. And use something like: log.setflags(log.Llongfile)
+	//TODO: glemt use something like: log.setflags(log.Llongfile)
 
 	//Blocking, to get client ID
 	getClientId(client, context)
@@ -47,7 +47,11 @@ func main() {
 	fmt.Println("Enter 'leave()' to leave the chatroom. \nEnter your message here:")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		go sendMessage(client, context, scanner.Text())
+		if len(scanner.Text()) > 128 {
+			fmt.Println("Message too long. Maximum length is 128 characters.")
+		} else {
+			go sendMessage(client, context, scanner.Text())
+		}
 		//fmt.Println("Please enter message:")
 	}
 }
