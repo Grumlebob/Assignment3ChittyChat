@@ -41,6 +41,16 @@ func main() {
 	//Leave chat on exit.
 	defer leaveChat(client, context)
 
+	/* leave chat with ctrl+c - currently not working.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		leaveChat(client, context)
+		fmt.Println("kom her til")
+	}()
+	*/
+
 	//Non-blocking, to enable client to send messages
 	go joinChat(client, context)
 
